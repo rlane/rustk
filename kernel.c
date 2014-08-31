@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+extern void main(void);
+
 #define PORT 0x3f8   /* COM1 */
 
 static inline void outb(uint16_t port, uint8_t val)
@@ -47,4 +49,6 @@ void kernel_main()
 {
     init_serial();
     puts("Hello, serial world!\n");
+    main();
+    puts("Kernel finished\n");
 }

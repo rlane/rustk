@@ -1,6 +1,7 @@
 AS := i686-elf-as
 CC := i686-elf-gcc
 LD := i686-elf-ld
+RUSTC := rustc
 
 CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
@@ -13,8 +14,14 @@ run: rustk
 		-device virtio-net-pci,romfile=,netdev=hostnet0 \
 		-nographic
 
+%.o: %.rs
+	$(RUSTC) -O --target i686-unknown-linux-gnu \
+		--crate-type staticlib -o $@ \
+		--emit obj $< \
+		-Z no-landing-pads -Z lto \
+		-C relocation-model=static -g
 
-rustk: boot.o kernel.o
+rustk: boot.o kernel.o main.o
 	$(LD) -T linker.ld -o $@ $^
 
 iso: rustk.iso
