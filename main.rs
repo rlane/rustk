@@ -23,6 +23,7 @@ fn log(msg: &str) {
 pub fn main() {
     serial::init();
     log("Hello from Rust\n");
+    halt();
 }
 
 #[no_split_stack]

@@ -21,7 +21,7 @@ run: rustk
 		-Z no-landing-pads -Z lto \
 		-C relocation-model=static -g
 
-rustk: boot.o kernel.o main.o
+rustk: boot.o main.o
 	$(LD) -T linker.ld -o $@ $^
 
 iso: rustk.iso
