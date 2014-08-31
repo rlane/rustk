@@ -9,20 +9,19 @@ extern crate core;
 use core::prelude::*;
 use core::fmt;
 
-extern {
-    fn write_serial(c: char);
-}
+mod serial;
 
 #[no_split_stack]
 fn log(msg: &str) {
     for c in msg.as_slice().chars() {
-        unsafe { write_serial(c) };
+        serial::write(c);
     }
 }
 
 #[no_mangle]
 #[no_split_stack]
 pub fn main() {
+    serial::init();
     log("Hello from Rust\n");
 }
 
