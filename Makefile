@@ -6,7 +6,9 @@ CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 all: rustk
 
 run: rustk
-	kvm -kernel rustk
+	kvm -kernel rustk \
+		-netdev user,id=hostnet0 \
+		-device virtio-net-pci,romfile=,netdev=hostnet0
 
 rustk: boot.o kernel.o
 	$(CC) -T linker.ld -o rustk -nostdlib $^ -lgcc
