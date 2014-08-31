@@ -1,5 +1,6 @@
 AS := i686-elf-as
 CC := i686-elf-gcc
+LD := i686-elf-ld
 
 CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
@@ -11,7 +12,7 @@ run: rustk
 		-device virtio-net-pci,romfile=,netdev=hostnet0
 
 rustk: boot.o kernel.o
-	$(CC) -T linker.ld -o rustk -nostdlib $^ -lgcc
+	$(LD) -T linker.ld -o $@ $^
 
 iso: rustk.iso
 rustk.iso: rustk grub.cfg
