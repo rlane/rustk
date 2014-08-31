@@ -7,9 +7,12 @@ CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 all: rustk
 
 run: rustk
+	@echo "Hit CTRL-a x to terminate, CTRL-a h for help"
 	kvm -kernel rustk \
 		-netdev user,id=hostnet0 \
-		-device virtio-net-pci,romfile=,netdev=hostnet0
+		-device virtio-net-pci,romfile=,netdev=hostnet0 \
+		-nographic
+
 
 rustk: boot.o kernel.o
 	$(LD) -T linker.ld -o $@ $^
