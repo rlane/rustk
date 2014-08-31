@@ -19,7 +19,8 @@ run: rustk
 		--crate-type staticlib -o $@ \
 		--emit obj $< \
 		-Z no-landing-pads -Z lto \
-		-C relocation-model=static -g
+		-C relocation-model=static -g \
+		--dep-info $@.dep
 
 rustk: boot.o main.o
 	$(LD) -T linker.ld -o $@ $^
@@ -37,3 +38,5 @@ clean:
 	rm -f rustk *.o rustk.iso
 
 .PHONY: all run iso clean
+
+-include *.dep

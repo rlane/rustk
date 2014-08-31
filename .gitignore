@@ -2,3 +2,4 @@ rustk
 *.o
 *.iso
 isodir
+*.dep
