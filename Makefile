@@ -1,9 +1,6 @@
 AS := i686-elf-as
-CC := i686-elf-gcc
 LD := i686-elf-ld
 RUSTC := rustc
-
-CFLAGS := -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 all: rustk
 
