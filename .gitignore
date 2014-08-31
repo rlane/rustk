@@ -1,0 +1,4 @@
+rustk
+*.o
+*.iso
+isodir
