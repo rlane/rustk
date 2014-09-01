@@ -33,7 +33,7 @@ mod gdt;
 
 #[no_mangle]
 #[no_split_stack]
-pub fn main() {
+pub fn main() -> ! {
     serial::init();
     //log!("Hello from Rust");
     gdt::init();
