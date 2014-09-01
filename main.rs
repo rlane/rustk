@@ -13,13 +13,13 @@ extern crate core;
 extern crate std = "core";
 
 use core::prelude::*;
-use core::fmt;
-use core::fmt::FormatWriter;
+
+mod serial;
 
 #[macro_export]
 macro_rules! log(
     ($($arg:tt)*) => ({
-        use SerialFmtWriter;
+        use serial::SerialFmtWriter;
         use core::fmt::FormatWriter;
         let mut w = SerialFmtWriter;
         match writeln!(w, $($arg)*) {
@@ -27,8 +27,6 @@ macro_rules! log(
         };
     })
 )
-
-mod serial;
 
 #[no_mangle]
 pub fn main() -> ! {
@@ -46,20 +44,8 @@ pub fn halt() -> ! {
     }
 }
 
-pub struct SerialFmtWriter;
-
-impl fmt::FormatWriter for SerialFmtWriter {
-    fn write(&mut self, bytes: &[u8]) -> fmt::Result {
-        for &c in bytes.iter() {
-            serial::write(c as char);
-            serial::debug_write(c as char);
-        }
-        Ok(())
-    }
-}
-
 #[lang="begin_unwind"]
-unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) -> ! {
+unsafe extern "C" fn begin_unwind(fmt: &core::fmt::Arguments, file: &str, line: uint) -> ! {
     log!("Failure: {} at {}:{}", fmt, file, line);
     halt();
 }

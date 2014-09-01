@@ -1,3 +1,7 @@
+use core::prelude::*;
+use core::fmt;
+use core::result;
+
 static PORT : u16 = 0x3f8; /* COM1 */
 
 unsafe fn outb(port: u16, val: u8) {
@@ -36,4 +40,16 @@ pub fn write(c: char) {
 
 pub fn debug_write(c: char) {
    unsafe { outb(0xe9, c as u8); }
+}
+
+pub struct SerialFmtWriter;
+
+impl fmt::FormatWriter for SerialFmtWriter {
+    fn write(&mut self, bytes: &[u8]) -> fmt::Result {
+        for &c in bytes.iter() {
+            write(c as char);
+            debug_write(c as char);
+        }
+        result::Ok(())
+    }
 }
