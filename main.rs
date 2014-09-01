@@ -14,8 +14,6 @@ extern crate std = "core";
 
 use core::prelude::*;
 
-mod serial;
-
 #[macro_export]
 macro_rules! log(
     ($($arg:tt)*) => ({
@@ -27,6 +25,9 @@ macro_rules! log(
         };
     })
 )
+
+mod serial;
+pub mod lang;
 
 #[no_mangle]
 pub fn main() -> ! {
@@ -42,18 +43,4 @@ pub fn halt() -> ! {
             asm!("cli; hlt");
         }
     }
-}
-
-#[lang="begin_unwind"]
-unsafe extern "C" fn begin_unwind(fmt: &core::fmt::Arguments, file: &str, line: uint) -> ! {
-    log!("Failure: {} at {}:{}", fmt, file, line);
-    halt();
-}
-
-#[lang = "stack_exhausted"] extern fn stack_exhausted() {}
-#[lang = "eh_personality"] extern fn eh_personality() {}
-
-#[no_mangle]
-pub fn __morestack() -> ! {
-    fail!("__morestack called");
 }
