@@ -32,7 +32,7 @@ rustk.iso: rustk grub.cfg
 	grub-mkrescue -o rustk.iso isodir
 
 clean:
-	rm -f rustk *.o rustk.iso
+	rm -f rustk *.o rustk.iso *.dep
 
 .PHONY: all run iso clean
 
