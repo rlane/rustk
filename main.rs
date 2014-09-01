@@ -31,7 +31,6 @@ macro_rules! log(
 mod serial;
 
 #[no_mangle]
-#[no_split_stack]
 pub fn main() -> ! {
     serial::init();
     log!("Hello from Rust");
@@ -39,7 +38,6 @@ pub fn main() -> ! {
     fail!("Finished");
 }
 
-#[no_split_stack]
 pub fn halt() -> ! {
     loop {
         unsafe {
@@ -59,7 +57,6 @@ impl fmt::FormatWriter for SerialFmtWriter {
     }
 }
 
-#[no_split_stack]
 #[lang="begin_unwind"]
 unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) -> ! {
     log!("Failure: {} at {}:{}", fmt, file, line);
@@ -69,7 +66,6 @@ unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) 
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
 
-#[no_split_stack]
 #[no_mangle]
 pub fn __morestack() -> ! {
     fail!("__morestack called");
