@@ -30,8 +30,58 @@ _start:
 	# our stack (as it grows downwards).
 	movl $stack_top, %esp
 
+	# Rust needs %gs for __morestack
+	call setup_gdt
+
 	# Jump to Rust, will not return
 	call main
 	cli
 	hlt
 .size _start, . - _start
+
+# TLS data
+.section .data.tls
+.skip 64
+
+# GDT data
+.section .data.gdt
+.quad 0
+.quad 0x00cf9a000000ffff # code
+.quad 0x00cf92000000ffff # data
+.quad 0x00cf92000000ffff # TLS
+
+# GDTR data
+.section .data.gdtr
+.word 31
+.long .data.gdt
+
+.section .text
+setup_gdt:
+    # Update TLS descriptor
+    mov $.data.tls, %eax
+    and $0xffffff, %eax
+    or %eax, (.data.gdt+26)
+    # Load segments
+    mov $.data.gdtr, %eax
+    lgdtw (%eax)
+    mov $0x10, %eax
+    mov %eax, %ds
+    mov %eax, %es
+    mov %eax, %fs
+    mov %eax, %ss
+    mov $0x18, %eax
+    mov %eax, %gs
+    ljmp $0x08, $.Lhere
+    .Lhere:
+    ret
+
+.section .text
+dbg:
+    push %edx
+    push %eax
+    mov $0x3f8, %dx
+    mov $0x58, %al
+    out %al, (%dx)
+    pop %eax
+    pop %edx
+    ret

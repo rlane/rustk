@@ -29,14 +29,12 @@ macro_rules! log(
 )
 
 mod serial;
-mod gdt;
 
 #[no_mangle]
 #[no_split_stack]
 pub fn main() -> ! {
     serial::init();
-    //log!("Hello from Rust");
-    gdt::init();
+    log!("Hello from Rust");
     log!("Initialization complete");
     fail!("Finished");
 }
