@@ -30,6 +30,9 @@ _start:
 	# our stack (as it grows downwards).
 	movl $stack_top, %esp
 
+	# Save pointer to multiboot info
+	mov %ebx, .data.multiboot_info
+
 	# Rust needs %gs for __morestack
 	call setup_gdt
 
@@ -38,6 +41,13 @@ _start:
 	cli
 	hlt
 .size _start, . - _start
+
+# Multiboot info pointer
+.section .data.multiboot_info
+.global multiboot_ptr
+multiboot_ptr:
+.align 4
+.long 0
 
 # TLS data
 .section .data.tls

@@ -17,11 +17,13 @@ use core::prelude::*;
 mod log;
 mod serial;
 pub mod lang;
+mod multiboot;
 
 #[no_mangle]
 pub fn main() -> ! {
     serial::init();
     log!("Hello from Rust");
+    multiboot::init();
     log!("Initialization complete");
     fail!("Finished");
 }
