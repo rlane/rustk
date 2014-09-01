@@ -1,12 +1,10 @@
-use log;
-
 static mut GDT: [u64, .. 4] = [ 0, 0, 0, 0 ];
 static TLS: [u32, .. 16] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
 
 #[inline(never)]
 #[no_split_stack]
 pub fn init() {
-    log("Initializing GDT ... ");
+    //log!("Initializing GDT");
     unsafe {
         let gdt_base = &GDT as *const [u64, .. 4] as u32;
         let tls_base = &TLS as *const [u32, .. 16] as u32;
@@ -25,7 +23,6 @@ pub fn init() {
         asm!("mov $0, %ss" :: "r"(0x10u32));
         asm!("jmp $0, $$.flush; .flush:" :: "Ir"(8u32));
     }
-    log("done\n");
 }
 
 #[no_split_stack]

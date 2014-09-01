@@ -4,6 +4,7 @@
 #![feature(lang_items)]
 #![feature(asm)]
 #![feature(phase)]
+#![feature(macro_rules)]
 
 #[phase(link, plugin)]
 extern crate core;
@@ -15,23 +16,28 @@ use core::prelude::*;
 use core::fmt;
 use core::fmt::FormatWriter;
 
+#[macro_export]
+macro_rules! log(
+    ($($arg:tt)*) => ({
+        use SerialFmtWriter;
+        use core::fmt::FormatWriter;
+        let mut w = SerialFmtWriter;
+        match writeln!(w, $($arg)*) {
+            _ => ()
+        };
+    })
+)
+
 mod serial;
 mod gdt;
-
-#[no_split_stack]
-pub fn log(msg: &str) {
-    for c in msg.as_slice().chars() {
-        serial::write(c);
-    }
-}
 
 #[no_mangle]
 #[no_split_stack]
 pub fn main() {
     serial::init();
-    log("Hello from Rust\n");
+    //log!("Hello from Rust");
     gdt::init();
-    log("Initialization complete\n");
+    log!("Initialization complete");
     fail!("Finished");
 }
 
@@ -44,7 +50,7 @@ pub fn halt() -> ! {
     }
 }
 
-struct SerialFmtWriter;
+pub struct SerialFmtWriter;
 
 impl fmt::FormatWriter for SerialFmtWriter {
     fn write(&mut self, bytes: &[u8]) -> fmt::Result {
@@ -58,10 +64,7 @@ impl fmt::FormatWriter for SerialFmtWriter {
 #[no_split_stack]
 #[lang="begin_unwind"]
 unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) -> ! {
-    let mut w = SerialFmtWriter;
-    match writeln!(w, "Failure: {} at {}:{}", fmt, file, line) {
-        _ => ()
-    };
+    log!("Failure: {} at {}:{}", fmt, file, line);
     halt();
 }
 
@@ -71,6 +74,5 @@ unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) 
 #[no_split_stack]
 #[no_mangle]
 pub fn __morestack() -> ! {
-    log("__morestack called, halting");
-    halt();
+    fail!("__morestack called");
 }
