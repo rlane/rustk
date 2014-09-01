@@ -3,3 +3,4 @@ rustk
 *.iso
 isodir
 *.dep
+debug.log
