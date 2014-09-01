@@ -10,9 +10,10 @@ use core::prelude::*;
 use core::fmt;
 
 mod serial;
+mod gdt;
 
 #[no_split_stack]
-fn log(msg: &str) {
+pub fn log(msg: &str) {
     for c in msg.as_slice().chars() {
         serial::write(c);
     }
@@ -23,6 +24,8 @@ fn log(msg: &str) {
 pub fn main() {
     serial::init();
     log("Hello from Rust\n");
+    gdt::init();
+    log("Initialization complete\n");
     halt();
 }
 
