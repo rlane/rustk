@@ -52,6 +52,7 @@ impl fmt::FormatWriter for SerialFmtWriter {
     fn write(&mut self, bytes: &[u8]) -> fmt::Result {
         for &c in bytes.iter() {
             serial::write(c as char);
+            serial::debug_write(c as char);
         }
         Ok(())
     }

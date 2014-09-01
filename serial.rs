@@ -33,3 +33,7 @@ pub fn write(c: char) {
 
    unsafe { outb(PORT, c as u8); }
 }
+
+pub fn debug_write(c: char) {
+   unsafe { outb(0xe9, c as u8); }
+}

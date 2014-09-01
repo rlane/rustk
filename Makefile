@@ -9,7 +9,10 @@ run: rustk
 	kvm -kernel rustk \
 		-netdev user,id=hostnet0 \
 		-device virtio-net-pci,romfile=,netdev=hostnet0 \
-		-nographic
+		-nographic \
+		-debugcon file:debug.log \
+		-gdb tcp::1234,server,nowait
+
 
 %.o: %.rs
 	$(RUSTC) -O --target i686-unknown-linux-gnu \
