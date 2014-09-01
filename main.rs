@@ -14,18 +14,7 @@ extern crate std = "core";
 
 use core::prelude::*;
 
-#[macro_export]
-macro_rules! log(
-    ($($arg:tt)*) => ({
-        use serial::SerialFmtWriter;
-        use core::fmt::FormatWriter;
-        let mut w = SerialFmtWriter;
-        match writeln!(w, $($arg)*) {
-            _ => ()
-        };
-    })
-)
-
+mod log;
 mod serial;
 pub mod lang;
 
