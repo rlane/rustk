@@ -33,6 +33,8 @@ _start:
 	# Save pointer to multiboot info
 	mov %ebx, .data.multiboot_info
 
+	call enter_long_mode
+
 	# Rust needs %gs for __morestack
 	call setup_gdt
 
@@ -92,6 +94,47 @@ dbg:
     mov $0x3f8, %dx
     mov $0x58, %al
     out %al, (%dx)
+    mov $0xe9, %dx
+    out %al, (%dx)
     pop %eax
     pop %edx
     ret
+
+.section .text
+enter_long_mode:
+    # Populate physical address in pml4
+    mov $.data.pdpt, %eax
+    or %eax, .data.pml4
+
+    # Set CR4.pae = 1
+    mov %cr4, %eax
+    or $(1 << 5), %eax
+    mov %eax, %cr4
+
+    # Load CR3 with pml4
+    mov $.data.pml4, %eax
+    mov %eax, %cr3
+
+    # Set IA32_EFER.LME = 1.
+    mov $0xc0000080, %ecx
+    rdmsr
+    or $(1 << 8), %eax
+    wrmsr
+
+    # Set CR0.pg = 1
+    mov %cr0, %eax
+    or $(1 << 31), %eax
+    mov %eax, %cr0
+
+    # TODO load 64-bit CS
+    ret
+
+.section .data.pml4
+.align 4096
+.quad 0x0000000000000007
+.skip 4088
+
+.section .data.pdpt
+.align 4096
+.quad 0x0000000000000087
+.skip 4088
