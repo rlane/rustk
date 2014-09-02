@@ -33,6 +33,7 @@ _start:
 	# Save pointer to multiboot info
 	mov %ebx, .data.multiboot_info
 
+	call check_long_mode
 	call enter_long_mode
 
 	# Rust needs %gs for __morestack
@@ -101,6 +102,34 @@ dbg:
     ret
 
 .section .text
+check_long_mode:
+    mov $0x80000001, %eax
+    cpuid
+    test $(1<<29), %edx
+    jz abort_no_64bit
+    test $(1<<26), %edx
+    jz abort_no_1gb_pages
+    ret
+
+abort_no_64bit:
+    mov $.data.no_64bit, %esi
+    mov $39, %ecx
+    mov $0xe9, %dx
+    rep outsb
+    cli
+    hlt
+    jmp abort_no_64bit
+
+abort_no_1gb_pages:
+    mov $.data.no_1gb_pages, %esi
+    mov $38, %ecx
+    mov $0xe9, %dx
+    rep outsb
+    cli
+    hlt
+    jmp abort_no_1gb_pages
+
+.section .text
 enter_long_mode:
     # Populate physical address in pml4
     mov $.data.pdpt, %eax
@@ -138,3 +167,9 @@ enter_long_mode:
 .align 4096
 .quad 0x0000000000000087
 .skip 4088
+
+.section .data.no_64bit
+.ascii "Processor does not support 64-bit mode\n"
+
+.section .data.no_1gb_pages
+.ascii "Processor does not support 1 GB pages\n"
