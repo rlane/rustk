@@ -33,14 +33,15 @@ _start:
 	# Save pointer to multiboot info
 	mov %ebx, .data.multiboot_info
 
-	call check_long_mode
-	call enter_long_mode
-
 	# Rust needs %gs for __morestack
 	call setup_gdt
 
+	call check_long_mode
+	call enter_long_mode
+
 	# Jump to Rust, will not return
 	call main
+	#lcall $0x20, $main # switch to 64-bit
 	cli
 	hlt
 .size _start, . - _start
@@ -62,10 +63,11 @@ multiboot_ptr:
 .quad 0x00cf9a000000ffff # code
 .quad 0x00cf92000000ffff # data
 .quad 0x00cf92000000ffff # TLS
+.quad 0x00af9a000000ffff # 64-bit code
 
 # GDTR data
 .section .data.gdtr
-.word 31
+.word (8*5)-1
 .long .data.gdt
 
 .section .text
@@ -155,7 +157,6 @@ enter_long_mode:
     or $(1 << 31), %eax
     mov %eax, %cr0
 
-    # TODO load 64-bit CS
     ret
 
 .section .data.pml4
