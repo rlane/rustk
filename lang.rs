@@ -11,6 +11,7 @@ unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) 
 #[lang = "eh_personality"] extern fn eh_personality() {}
 
 #[no_mangle]
+#[no_split_stack]
 pub fn __morestack() -> ! {
     fail!("__morestack called");
 }
