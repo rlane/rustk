@@ -1,5 +1,5 @@
-AS := i686-elf-as
-LD := i686-elf-ld
+AS := x86_64-elf-as
+LD := x86_64-elf-ld
 RUSTC := rustc
 
 all: rustk
@@ -15,15 +15,17 @@ run: rustk
 
 
 %.o: %.rs
-	$(RUSTC) -O --target i686-unknown-linux-gnu \
+	$(RUSTC) -O --target x86_64-unknown-linux-gnu \
 		--crate-type staticlib -o $@ \
 		--emit obj $< \
 		-Z no-landing-pads -Z lto \
 		-C relocation-model=static -g \
 		--dep-info $@.dep
 
+boot.o: ASFLAGS=--32
+
 rustk: boot.o main.o
-	$(LD) -T linker.ld -o $@ $^
+	$(LD) -T linker.ld -z max-page-size=4096 --no-warn-mismatch -o $@ $^
 
 iso: rustk.iso
 rustk.iso: rustk grub.cfg

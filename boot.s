@@ -41,8 +41,7 @@ _start:
 	call setup_sse
 
 	# Jump to Rust, will not return
-	call main
-	#lcall $0x20, $main # switch to 64-bit
+	lcall $0x20, $main # switch to 64-bit
 	cli
 	hlt
 .size _start, . - _start
