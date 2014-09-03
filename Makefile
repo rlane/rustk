@@ -2,17 +2,22 @@ AS := x86_64-elf-as
 LD := x86_64-elf-ld
 RUSTC := rustc
 
-all: rustk
+all: iso
 
-run: rustk
+run: run-kvm
+
+run-kvm: rustk.iso
 	@echo "Hit CTRL-a x to terminate, CTRL-a h for help"
-	kvm -kernel rustk \
+	qemu-system-x86_64 \
+		-cdrom rustk.iso \
 		-netdev user,id=hostnet0 \
 		-device virtio-net-pci,romfile=,netdev=hostnet0 \
 		-nographic \
 		-debugcon file:debug.log \
 		-gdb tcp::1234,server,nowait
 
+run-bochs: iso
+	bochs -qf bochs.cfg
 
 %.o: %.rs
 	$(RUSTC) -O --target x86_64-unknown-linux-gnu \
@@ -39,6 +44,6 @@ rustk.iso: rustk grub.cfg
 clean:
 	rm -f rustk *.o rustk.iso *.dep
 
-.PHONY: all run iso clean
+.PHONY: all run run-kvm run-bochs iso clean
 
 -include *.dep
