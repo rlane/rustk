@@ -38,6 +38,7 @@ _start:
 
 	call check_long_mode
 	call enter_long_mode
+	call setup_sse
 
 	# Jump to Rust, will not return
 	call main
@@ -174,3 +175,10 @@ enter_long_mode:
 
 .section .data.no_1gb_pages
 .ascii "Processor does not support 1 GB pages\n"
+
+.section .text
+setup_sse:
+	mov %cr4, %eax
+	or $((1<<9) | (1<<10)), %eax
+	mov %eax, %cr4
+	ret
