@@ -37,6 +37,7 @@ _start:
 	call setup_gdt
 
 	call check_long_mode
+	call setup_pagetables
 	call enter_long_mode
 	call setup_sse
 
@@ -109,8 +110,6 @@ check_long_mode:
     cpuid
     test $(1<<29), %edx
     jz abort_no_64bit
-    test $(1<<26), %edx
-    jz abort_no_1gb_pages
     ret
 
 abort_no_64bit:
@@ -122,28 +121,15 @@ abort_no_64bit:
     hlt
     jmp abort_no_64bit
 
-abort_no_1gb_pages:
-    mov $.data.no_1gb_pages, %esi
-    mov $38, %ecx
-    mov $0xe9, %dx
-    rep outsb
-    cli
-    hlt
-    jmp abort_no_1gb_pages
-
 .section .text
 enter_long_mode:
-    # Populate physical address in pml4
-    mov $.data.pdpt, %eax
-    or %eax, .data.pml4
-
     # Set CR4.pae = 1
     mov %cr4, %eax
     or $(1 << 5), %eax
     mov %eax, %cr4
 
     # Load CR3 with pml4
-    mov $.data.pml4, %eax
+    mov $.bss.pml4, %eax
     mov %eax, %cr3
 
     # Set IA32_EFER.LME = 1.
@@ -159,21 +145,20 @@ enter_long_mode:
 
     ret
 
-.section .data.pml4
+.section .bss.pml4
 .align 4096
-.quad 0x0000000000000007
-.skip 4088
+.skip 4096
 
-.section .data.pdpt
+.section .bss.pdpt
 .align 4096
-.quad 0x0000000000000087
-.skip 4088
+.skip 4096
+
+.section .bss.pd
+.align 4096
+.skip 4096
 
 .section .data.no_64bit
 .ascii "Processor does not support 64-bit mode\n"
-
-.section .data.no_1gb_pages
-.ascii "Processor does not support 1 GB pages\n"
 
 .section .text
 setup_sse:
@@ -181,3 +166,27 @@ setup_sse:
 	or $((1<<9) | (1<<10)), %eax
 	mov %eax, %cr4
 	ret
+
+.section .text
+setup_pagetables:
+    # Populate first entry in pml4 (512 GB)
+    mov $.bss.pdpt, %eax
+    or $7, %eax
+    or %eax, .bss.pml4
+
+    # Populate first entry in pdpt (1 GB)
+    mov $.bss.pd, %eax
+    or $7, %eax
+    or %eax, .bss.pdpt
+
+    # Populate every entry in pd (2 MB)
+    mov $0, %ecx
+    mov $0x87, %eax
+Lpd:
+    mov %eax, .bss.pd(, %ecx, 8)
+    add $0x200000, %eax
+    inc %ecx
+    cmp $512, %ecx
+    jl Lpd
+
+    ret
