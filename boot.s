@@ -56,7 +56,7 @@ multiboot_ptr:
 
 # TLS data
 .section .data.tls
-.skip 64
+.skip 0x100
 
 # GDT data
 .section .data.gdt
@@ -83,9 +83,9 @@ setup_gdt:
     mov $0x10, %eax
     mov %eax, %ds
     mov %eax, %es
-    mov %eax, %fs
     mov %eax, %ss
     mov $0x18, %eax
+    mov %eax, %fs
     mov %eax, %gs
     ljmp $0x08, $.Lhere
     .Lhere:
