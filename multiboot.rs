@@ -37,17 +37,17 @@ struct Mem {
 }
 
 extern {
-    static multiboot_ptr: &'static Info;
+    static multiboot_ptr : u32;
 }
 
 pub fn init() {
-    let info = multiboot_ptr;
+    let info : &Info = unsafe { transmute(multiboot_ptr as uint) };
     log!("Reading Multiboot information at {}", multiboot_ptr as *const Info);
     if info.flags & FlagMmap as u32 != 0 {
         log!("Memory map:");
         let mut offset = 0;
         while offset < info.mmap_length {
-            let mem : &Mem = unsafe { transmute(info.mmap_addr + offset) };
+            let mem : &Mem = unsafe { transmute(info.mmap_addr as uint + offset as uint) };
             if mem.typ == 1 {
                 log!("{} bytes available starting at 0x{:x}", mem.length, mem.base_addr);
             }
