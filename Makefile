@@ -22,7 +22,7 @@ run: rustk
 		-C relocation-model=static -g \
 		--dep-info $@.dep
 
-boot.o: ASFLAGS=--32
+boot.o: ASFLAGS=--32 -g
 
 rustk: boot.o main.o
 	$(LD) -T linker.ld -z max-page-size=4096 --no-warn-mismatch -o $@ $^
